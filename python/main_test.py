@@ -85,7 +85,7 @@ RatID = input("please scan a command RFID\n")[-8:]
 # sync data
 if RatID[-2:] == "94" or RatID[-2:] == "fa":
     subprocess.call(
-        "bash /home/pi/openbehavior/PeerPub/wifi-network/rsync.sh", shell=True)
+        "bash /home/pi/openbehavior/HomeBrew/wifi-network/rsync.sh", shell=True)
     # exit the program
     #sys.exit()
     
@@ -100,7 +100,7 @@ if RatID[-2:] == "0c" or RatID[-2:] == "fe":
 if UPDATE_REPO:
     # after update, the pi will restart within 1 minutes
     subprocess.call(
-        "bash /home/pi/openbehavior/PeerPub/utility_script/update_repo.sh &", shell=True)
+        "bash /home/pi/openbehavior/HomeBrew/utility_script/update_repo.sh &", shell=True)
     # exit the program
     sys.exit()
 
