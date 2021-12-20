@@ -41,7 +41,9 @@ class PumpMove:
         }
 
         # self.delay = .0209 / 50
-        self.delay = .0209 / 40
+        #self.delay = .0209 / 40
+        self.delayforward = .0209 / 40
+        self.delaybackward = .0209 / 1000
         self.rotate_dir = rotate_dir
 
     # move forward and backward by providing the direction
@@ -54,9 +56,9 @@ class PumpMove:
 
             for _ in range(steps):
                 self.GPIO.output(self.STEP, self.GPIO.HIGH)
-                sleep(self.delay)
+                sleep(self.delayforward)
                 self.GPIO.output(self.STEP, self.GPIO.LOW)
-                sleep(self.delay)
+                sleep(self.delaybackward)
 
             self.GPIO.output(self.STEP, self.GPIO.HIGH)
         except KeyError:
