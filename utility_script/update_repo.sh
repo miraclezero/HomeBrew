@@ -5,7 +5,7 @@
 
 cd /home/pi/openbehavior/HomeBrew/ && git pull
 
-BOXID=`cat /home/pi/devicdid`
+BOXID=`cat /home/pi/deviceid`
 echo $BOXID
 echo $(date +"%m-%d-%y %T") $(git log -1 --pretty=oneline) >> "/home/pi/SocialDrinking/${BOXID}_update"
 
