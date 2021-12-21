@@ -311,5 +311,5 @@ RatActivityCounter.show_data(devID, sesID, sessionLength, schedule, lapsed, \
 
 # call bash script, which sync the data file and reboot device
 # see 'rsync.sh' file in wifi-network folder for details
-subprocess.call('/home/pi/openbehavior/PeerPub/wifi-network/rsync.sh &', shell=True)
+subprocess.call('/home/pi/openbehavior/HomeBrew/wifi-network/rsync.sh &', shell=True)
 print(devID+  "Session"+ str(sesID) + " Done!\n")
