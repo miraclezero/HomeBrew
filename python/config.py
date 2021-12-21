@@ -4,7 +4,7 @@ ROOT = "/home/pi"
 DATA_DIR = "{}/{}/".format(ROOT, "SocialDrinking")
 # each data file starts with Soc_
 DATA_PREFIX = "Soc_"
-CONFIG_FILE = "/home/pi/openbehavior/PeerPub/python/session_configuration.csv"
+CONFIG_FILE = "/home/pi/openbehavior/HomeBrew/python/session_configuration.csv"
 
 
 def get_sessioninfo(sessionid):
