@@ -17,7 +17,7 @@ delay=`shuf -i1-3 -n1`
 
 # remove files older than 15 days but keep stepsize and git update files
 rm `find /home/pi/SocialDrinking/* -mtime +15 |grep -v 'steps\|update'`
-
+sleep 5
 gzip -f /home/pi/SocialDrinking/*csv
 
 rsync -auvp -e ssh /home/pi/SocialDrinking/ root@149.56.128.122:~/Dropbox/Pies/SocialDrinking/ 
