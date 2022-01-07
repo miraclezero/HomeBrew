@@ -84,6 +84,13 @@ The main (main_test.py) program is used to read/scan the pre-configured command 
    | IN | **Pi** - GPIO 18|
    | GND | **Pi** - any GND pin |
    | 5V DC | **Pi** - any 5V pin |
+   
+   [LED lights]
+   | Pins on the driver | GPIO pin slot on the Pi|
+   |--------------------|------------------------|
+   | Active LED | **Pi** - GPIO 16|
+   | Inactive LED | **Pi** - GPIO 19 |
+   **Connect resistor and GND correspondingly**
 
 ## Resources
    [Raspberry Pi Stepper Motor Tutorial](https://www.rototron.info/raspberry-pi-stepper-motor-tutorial/)  
