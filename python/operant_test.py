@@ -77,6 +77,10 @@ rfid_file=args.rfidFile
 i2c = busio.I2C(board.SCL, board.SDA)
 # Create MPR121 object.
 mpr121 = adafruit_mpr121.MPR121(i2c)
+mpr121[0].threshold = 6
+mpr121[0].release_threshold= 2
+mpr121[1].threshold = 6
+mpr121[1].release_threshold= 2
 
 # Initialize GPIO
 gpio.setwarnings(False)
