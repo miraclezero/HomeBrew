@@ -49,7 +49,9 @@ parser.add_argument('-sessionLength',  type=int, default=3600)
 parser.add_argument('-timeout',  type=int, default=20)
 parser.add_argument('-rat1ID',  type=str, default="rat1")
 parser.add_argument('-rat2ID',  type=str, default="rat2")
-parser.add_argument('-rfidFile',  type=str)
+parser.add_argument('-rat3ID',  type=str, default="rat3")
+parser.add_argument('-rat4ID',  type=str, default="rat4")
+parser.add_argument('-rfidFile', type=str)
 parser.add_argument('-devID', type=str)
 parser.add_argument('-sesID', type=int)
 parser.add_argument('-step', type=int)
@@ -62,6 +64,8 @@ sessionLength=args.sessionLength
 timeout=args.timeout
 rat1ID=args.rat1ID
 rat2ID=args.rat2ID
+rat3ID=args.rat3ID
+rat4ID=args.rat4ID
 rat0ID="ratUnknown"
 step=args.step
 
@@ -77,10 +81,12 @@ rfid_file=args.rfidFile
 i2c = busio.I2C(board.SCL, board.SDA)
 # Create MPR121 object.
 mpr121 = adafruit_mpr121.MPR121(i2c)
+
 mpr121[0].threshold = 6
 mpr121[0].release_threshold= 2
 mpr121[1].threshold = 6
 mpr121[1].release_threshold= 2
+
 
 # Initialize GPIO
 gpio.setwarnings(False)
@@ -111,7 +117,7 @@ date=time.strftime("%Y-%m-%d", time.localtime())
 # Initialize data logger 
 dlogger = LickLogger(devID, sesID)
 # create a new data file to store the data
-dlogger.createDataFile(schedule="{}{}TO{}".format(schedule,str(ratio),str(timeout)) , ratIDs=rat1ID+"_"+rat2ID, sessLen=sessionLength)
+dlogger.createDataFile(schedule="{}{}TO{}".format(schedule,str(ratio),str(timeout)) , ratIDs=rat1ID+"_"+rat2ID+"_"+rat3ID+"_"+rat4ID, sessLen=sessionLength)
 
 # Get start time
 sTime = time.time()
@@ -121,20 +127,22 @@ FORWARD_LIMIT_BTN = 24
 FORWARD_LIMIT_REACHED = False
 # BACKWARD_LIMIT_BTN = 23
 
-lastActiveLick={rat0ID:{"time":float(sTime), "scantime": 0}, rat1ID:{"time":float(sTime), "scantime":0}, rat2ID:{"time":float(sTime), "scantime":0}}
-lastInactiveLick={rat0ID:{"time":float(sTime), "scantime": 0}, rat1ID:{"time":float(sTime), "scantime":0}, rat2ID:{"time":float(sTime), "scantime":0}}
+lastActiveLick={rat0ID:{"time":float(sTime), "scantime": 0}, rat1ID:{"time":float(sTime), "scantime":0}, rat2ID:{"time":float(sTime), "scantime":0},rat3ID:{"time":float(sTime), "scantime":0},rat4ID:{"time":float(sTime), "scantime":0}}
+lastInactiveLick={rat0ID:{"time":float(sTime), "scantime": 0}, rat1ID:{"time":float(sTime), "scantime":0}, rat2ID:{"time":float(sTime), "scantime":0},rat3ID:{"time":float(sTime), "scantime":0},rat4ID:{"time":float(sTime), "scantime":0}}
 
 ##############################################################
 rats = {
-    rat1ID: RatActivityCounter(rat1ID,ratio , "rat1"),
+    rat1ID: RatActivityCounter(rat1ID,ratio, "rat1"),
     rat2ID: RatActivityCounter(rat2ID,ratio, "rat2"),
+    rat3ID: RatActivityCounter(rat3ID,ratio, "rat3"),
+    rat4ID: RatActivityCounter(rat4ID,ratio, "rat4"),
     rat0ID: RatActivityCounter(rat0ID, 0),
 }
 ##############################################################
 
 FORWARD_LIMIT = gpio.setup(FORWARD_LIMIT_BTN, gpio.IN, pull_up_down= gpio.PUD_DOWN)
 
-pumptimedout={rat0ID:False, rat1ID:False, rat2ID:False}
+pumptimedout={rat0ID:False, rat1ID:False, rat2ID:False, rat3ID:False, rat4ID:False}
 global lapsed
 global prelapsed
 lapsed=0  # time since program start
@@ -219,7 +227,7 @@ while lapsed < sessionLength:
                 rat.update_last_licks(thisActiveLick, scantime, act=True)
                 
                 RatActivityCounter.show_data(devID, sesID, sessionLength, schedule, lapsed, \
-                                            rats[rat1ID],rats[rat2ID],rats[rat0ID])
+                                            rats[rat1ID],rats[rat2ID],rats[rat3ID],rats[rat4ID],rats[rat0ID])
 
                 updateTime = time.time()
 
@@ -248,7 +256,7 @@ while lapsed < sessionLength:
 
                         # show colored information
                         RatActivityCounter.show_data(devID, sesID, sessionLength, schedule, lapsed, \
-                                                rats[rat1ID],rats[rat2ID],rats[rat0ID])
+                                                rats[rat1ID],rats[rat2ID],rats[rat3ID],rats[rat4ID],rats[rat0ID])
 
                         updateTime = time.time()
 
@@ -275,7 +283,7 @@ while lapsed < sessionLength:
                 rat.update_last_licks(thisInactiveLick, scantime, act=False)
 
                 RatActivityCounter.show_data(devID, sesID, sessionLength, schedule, lapsed, \
-                                        rats[rat1ID],rats[rat2ID],rats[rat0ID])
+                                        rats[rat1ID],rats[rat2ID],rats[rat3ID],rats[rat4ID],rats[rat0ID])
 
                 updateTime = time.time()
 
@@ -285,7 +293,7 @@ while lapsed < sessionLength:
         #show data if idle more than 1 min 
         if time.time()-updateTime > 60*1:
             RatActivityCounter.show_data(devID, sesID, sessionLength, schedule, lapsed, \
-                                    rats[rat1ID],rats[rat2ID],rats[rat0ID])
+                                    rats[rat1ID],rats[rat2ID],rats[rat3ID],rats[rat4ID],rats[rat0ID])
             updateTime = time.time()
     except:
         logger.exception("while loop error")
@@ -295,13 +303,13 @@ dlogger.logEvent("", time.time(), "SessionEnd", time.time()-sTime)
 date=time.strftime("%Y-%m-%d", time.localtime())
 d_time = time.strftime("%H_%M_%S", time.localtime())
 
-formatted_schedule = schedule+str(ratio)+'TO'+str(timeout)+"_"+ rat1ID+"_"+rat2ID
+formatted_schedule = schedule+str(ratio)+'TO'+str(timeout)+"_"+ rat1ID+"_"+rat2ID+"_"+rat3ID+"_"+rat4ID
 schedule_to = schedule+str(ratio)+'TO'+str(timeout)
 finallog_fname = "Soc_{}_{}_{}_S{}_{}_{}_summary.tab".format(date,d_time,devID,sesID,formatted_schedule,sessionLength)
 
 # collect all data and make a final record
 data_dict = {}
-for rat_key, rat_rfid in zip(["ratID1","ratID2","ratID0"], [rat1ID, rat2ID, rat0ID]):
+for rat_key, rat_rfid in zip(["ratID1","ratID2","ratID3","ratID4","ratID0"], [rat1ID, rat2ID, rat3ID,rat4ID,rat0ID]):
     rat = rats[rat_rfid]
     data_dict[rat_key] = [rat_rfid, date, d_time, devID, sesID, schedule_to, \
                             sessionLength, rat.active_licks, rat.inactive_licks, \
@@ -311,7 +319,7 @@ LickLogger.finalLog(finallog_fname, data_dict, rfid_file)
 # show data one last time
 print(str(devID) +  "Session" + str(sesID) + " Done!\n")
 RatActivityCounter.show_data(devID, sesID, sessionLength, schedule, lapsed, \
-                        rats[rat1ID],rats[rat2ID],rats[rat0ID], "final")
+                        rats[rat1ID],rats[rat2ID],rats[rat3ID],rats[rat4ID],rats[rat0ID], "final")
 
 # call bash script, which sync the data file and reboot device
 # see 'rsync.sh' file in wifi-network folder for details
