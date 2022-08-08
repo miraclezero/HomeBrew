@@ -67,9 +67,9 @@ The main (main_test.py) program is used to read/scan the pre-configured command 
    [Limit Switch](https://www.amazon.com/MXRS-Hinge-Momentary-Button-Switch/dp/B07MW2RPJY/ref=lp_5739467011_1_7)
    | Pins on the driver | GPIO pin slot on the Pi and external wires|
    |--------------------|------------------------|
-   |  Normally Open (NO) | **Pi** - any 5V pin (red)|
-   |  Forward Limit - Contact Point (C) | **Pi** - GPIO 24 (green)|
-   |  Backward Limit - Contact Point (C) | **Pi** - GPIO 23 (white)|
+   |  Normally Open (NO) | **Pi** - any 5V pin|
+   |  Forward Limit - Contact Point (C) | **Pi** - GPIO 24|
+   |  Backward Limit - Contact Point (C) | **Pi** - GPIO 23|
 
    [Push Button](https://www.amazon.com/DAOKI-Miniature-Momentary-Tactile-Quality/dp/B01CGMP9GY/ref=asc_df_B01CGMP9GY/?tag=hyprod-20&linkCode=df0&hvadid=309774137275&hvpos=&hvnetw=g&hvrand=7843520885449353644&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9013532&hvtargid=pla-640514760452&psc=1)
    | Pins on the driver | GPIO pin slot on the Pi|
