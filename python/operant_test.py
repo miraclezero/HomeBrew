@@ -258,7 +258,7 @@ while lapsed < sessionLength:
                             rat.next_ratio = random.randint(1,ratio*2)
                         elif schedule == "pr":
                             breakpoint += 1.0
-                            rat.next_ratop = int(5*2.72**(breakpoint/5)-5)
+                            rat.next_ratio = int(5*2.72**(breakpoint/5)-5)
         elif ina0 == 1:
             thisInactiveLick = time.time()
 
