@@ -145,6 +145,8 @@ minInterLickInterval=0.15 # minimal interlick interval (about 6-7 licks per seco
 maxISI = 15  # max lapse between RFID scan and first lick in a cluster 
 maxILI = 3 # max interval between licks used to turn an RFID into unknown.   
 thisActiveLick=time.time()
+breakpoint=0
+
 def resetPumpTimeout(rat):
     # don't delete this line
     pumptimedout[rat] = False
