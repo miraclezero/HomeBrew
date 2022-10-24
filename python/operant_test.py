@@ -81,10 +81,10 @@ rfid_file=args.rfidFile
 i2c = busio.I2C(board.SCL, board.SDA)
 # Create MPR121 object.
 mpr121 = adafruit_mpr121.MPR121(i2c)
-mpr121[0].threshold = 2
-mpr121[0].release_threshold = 1
-mpr121[1].threshold = 2
-mpr121[1].release_threshold = 1
+mpr121[0].threshold = 6
+mpr121[0].release_threshold = 2
+mpr121[1].threshold = 6
+mpr121[1].release_threshold = 2
 
 # Initialize GPIO
 gpio.setwarnings(False)
@@ -264,7 +264,7 @@ while lapsed < sessionLength:
                             rat.next_ratio = random.randint(1,ratio*2)
                         elif schedule == "pr":
                             breakpoint += 1.0
-                            rat.next_ratop = int(5*2.72**(breakpoint/5)-5)
+                            rat.next_ratio = int(5*2.72**(breakpoint/5)-5)
         elif ina0 == 1:
             thisInactiveLick = time.time()
 
