@@ -233,6 +233,7 @@ while lapsed < sessionLength:
                         rat.reset_touch_counter()
                         # don't delete this line
                         pumptimedout[ratid] = True
+                        rats[ratid].pumptimedout = True
 
                         # spawn a temporary timer (thread)
                         pumpTimer = Timer(timeout, resetPumpTimeout, [ratid] )
