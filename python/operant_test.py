@@ -264,7 +264,7 @@ while lapsed < sessionLength:
                             rat.next_ratio = int(5*2.72**(breakpoint[ratid]/5)-5)
                         elif schedule == "vrwl":
                             rat.next_ratio = random.randint(1,ratio*2)
-                            if rat.rewards == 2:
+                            if rat.rewards == 50:
                                 rat.next_ratio = 100000
                             if rats[rat1ID].rewards == 50 and rats[rat2ID].rewards == 50:
                                 payload = {'text': '{} LIMITED REWARDS REACHED, SESSION END'.format(devID)}
