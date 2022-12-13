@@ -126,7 +126,7 @@ lastInactiveLick={rat0ID:{"time":float(sTime), "scantime": 0}, rat1ID:{"time":fl
 
 ##############################################################
 rats = {
-    rat1ID: RatActivityCounter(rat1ID,ratio , "rat1"),
+    rat1ID: RatActivityCounter(rat1ID,ratio, "rat1"),
     rat2ID: RatActivityCounter(rat2ID,ratio, "rat2"),
     rat0ID: RatActivityCounter(rat0ID, 0),
 }
@@ -262,6 +262,15 @@ while lapsed < sessionLength:
                         elif schedule == "pr":
                             breakpoint[ratid] += 1.0
                             rat.next_ratio = int(5*2.72**(breakpoint[ratid]/5)-5)
+                        elif schedule == "vrwl":
+                            rat.next_ratio = random.randint(1,ratio*2)
+                            if rat.rewards == 2:
+                                rat.next_ratio = 100000
+                            if rats[rat1ID].rewards == 50 and rats[rat2ID].rewards == 50:
+                                payload = {'text': '{} LIMITED REWARDS REACHED, SESSION END'.format(devID)}
+                                send_message(payload)
+                                break
+                            
         elif ina0 == 1:
             thisInactiveLick = time.time()
 
