@@ -146,10 +146,10 @@ minInterLickInterval=0.15 # minimal interlick interval (about 6-7 licks per seco
 maxISI = 15  # max lapse between RFID scan and first lick in a cluster 
 maxILI = 3 # max interval between licks used to turn an RFID into unknown.   
 thisActiveLick=time.time()
-rats[rat1ID].last_act_licks["time"]=time.time()
-rats[rat2ID].last_act_licks["time"]=time.time()
-rats[rat0ID].last_act_licks["time"]=time.time()
-
+#rats[rat1ID].last_act_licks["time"]=time.time()
+#rats[rat2ID].last_act_licks["time"]=time.time()
+#rats[rat0ID].last_act_licks["time"]=time.time()
+lastActTime=time.time() # for tracking pr session length
 def resetPumpTimeout(rat):
     # don't delete this line
     pumptimedout[rat] = False
@@ -206,12 +206,12 @@ while lapsed < sessionLength:
               logger.exception("unable to retrive key %s", ratid)
               
             print("pumptimeout = {}".format(rat.pumptimedout))
-
-            if(thisActiveLick - rat.last_act_licks["time"] > 1):
+            # 
+            if(thisActiveLick - rat.last_act_licks["time"] > 1):  
                 rat.update_last_licks(thisActiveLick, scantime, act=True)
             else:
                 rat.incr_active_licks()
-
+                
                 if FORWARD_LIMIT_REACHED:
                     # record empty syringe data
                     dlogger.logEvent(rat.ratid, time.time(), "syringe empty", time.time() - sTime) 
@@ -222,7 +222,7 @@ while lapsed < sessionLength:
                     dlogger.logEvent(rat.ratid, time.time() - rat.last_act_licks["scantime"], "ACTIVE", lapsed, rat.next_ratio) # add next ratio
 
                 rat.update_last_licks(thisActiveLick, scantime, act=True)
-                
+                lastActTime=thisActiveLick # for tracking PR session ends
                 RatActivityCounter.show_data(devID, sesID, sessionLength, schedule, lapsed, \
                                             rats[rat1ID],rats[rat2ID],rats[rat0ID])
 
@@ -296,7 +296,8 @@ while lapsed < sessionLength:
 
         # keep this here so that the PR data file will record lapse from sesion start 
         if schedule=="pr":
-            lapsed = time.time() - thisActiveLick
+            #lapsed = time.time() - thisActiveLick
+            lapsed = time.time() - lastActTime
         #show data if idle more than 1 min 
         if time.time()-updateTime > 60*1:
             RatActivityCounter.show_data(devID, sesID, sessionLength, schedule, lapsed, \
