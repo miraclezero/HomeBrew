@@ -69,13 +69,13 @@ class RatActivityCounter():
 
     def incr_rewards(self):
         self.rewards += 1
-
+    # all active licks
     def incr_active_licks(self):
         self.active_licks += 1
 
     def incr_inactive_licks(self):
         self.inactive_licks +=  1
-
+    # counts are active licks but only those contribute to the next reward (i.e., not during time out and resets after a reward is given
     def incr_touch_counter(self):
         self.touch_counter += 1 
 
