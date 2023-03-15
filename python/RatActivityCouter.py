@@ -77,7 +77,7 @@ class RatActivityCounter():
         self.inactive_licks +=  1
 
     def incr_touch_counter(self):
-        self. touch_counter += 1 
+        self.touch_counter += 1 
 
     def reset_touch_counter(self):
         self.touch_counter = 0
