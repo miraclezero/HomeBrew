@@ -128,7 +128,7 @@ lastInactiveLick={rat0ID:{"time":float(sTime), "scantime": 0}, rat1ID:{"time":fl
 rats = {
     rat1ID: RatActivityCounter(rat1ID,ratio, "rat1"),
     rat2ID: RatActivityCounter(rat2ID,ratio, "rat2"),
-    rat0ID: RatActivityCounter(rat0ID, 0),
+    rat0ID: RatActivityCounter(rat0ID,ratio, "ratUnknown"),
 }
 ##############################################################
 
@@ -231,7 +231,7 @@ while lapsed < sessionLength:
                 # if not rat.pumptimedout:
                 if not pumptimedout[ratid]:
                     rat.incr_touch_counter()
-                    if rat.touch_counter >= rat.next_ratio and rat.ratid != "ratUnknown":
+                    if rat.touch_counter >= rat.next_ratio:
                         rat.incr_rewards()
                         rat.reset_touch_counter()
                         # don't delete this line
