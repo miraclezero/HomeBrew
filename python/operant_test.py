@@ -136,6 +136,7 @@ FORWARD_LIMIT = gpio.setup(FORWARD_LIMIT_BTN, gpio.IN, pull_up_down= gpio.PUD_DO
 
 pumptimedout={rat0ID:False, rat1ID:False, rat2ID:False}
 breakpoint={rat0ID:0, rat1ID:0, rat2ID:0}
+prcount=0
 global lapsed
 global prelapsed
 lapsed=0  # time since program start
@@ -264,7 +265,9 @@ while lapsed < sessionLength:
                             rat.next_ratio = random.randint(1,ratio*2)
                         elif schedule == "pr":
                             breakpoint[ratid] += 1.0
-                            rat.next_ratio = int(5*2.72**(breakpoint[ratid]/5)-5)
+                            prcount += 1.0
+                            #rat.next_ratio = int(5*2.72**(breakpoint[ratid]/5)-5)
+                            rat.next_ratio = int(5*2.72**(prcount/5)-5)
                         elif schedule == "vrwl":
                             rat.next_ratio = random.randint(1,ratio*2)
                             if rat.rewards == 50:
