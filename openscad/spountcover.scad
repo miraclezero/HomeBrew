@@ -24,6 +24,10 @@ module screwset_frontpanel(){
 	translate([0,-dist,5])screw();
   	translate([0,-dist,-dist])screw();
   	translate([0,dist,-dist])screw();
+    translate([0,36,-39])screw();
+    translate([0,36,39])screw();
+    translate([0,-36,-39])screw();
+    translate([0,-36,39])screw();
 
 }
 
@@ -46,7 +50,7 @@ module antenna_cover(){
 module rfid_board_hook(){
 	distance=25;
     stickout=36;
-    x=23-23;
+    x=23;
 	translate([x,stickout,distance]) cube([3,4,4],center=true);
 	translate([x,stickout,-distance]) cube([3,4,4],center=true);
 	translate([x,-stickout,distance]) cube([3,4,5],center=true);
@@ -88,7 +92,7 @@ module spoutholder(){
 		translate([0,-60,14]) rotate([-55,0,0]) cylinder(r=1.9, h=50); //screw hole for tightening the spout 
 		translate([0,-10,-60]) cylinder(r=5, h=40); //hole for collection tube //yes
 		}
-		translate([15-23,35,0])cboard_screw();
+		translate([15,35,0])cboard_screw();
 		translate([0,0,30])cylinder(r=2.8,h=20,center=true);//cue light
 		translate([-8,0,30])cylinder(r=2.8,h=20,center=true);//cue light
 	}
@@ -105,8 +109,8 @@ module cboard_screw(dia=1.5){
 module frontpanel(){
     difference(){
         union(){
-            cube([82,77,2],center=true);
-            translate([0,0,2])cube([82,69,3],center=true);
+            cube([69,69,2],center=true);
+            translate([0,0,2])cube([84,78,3],center=true);
             translate([5,0,5])cylinder(r=dia-1,h=5,center=true);
         }
     	scale([.8,.95,1])translate([1,0,4])cylinder(r=dia-3,h=14,center=true,$fn=100);
@@ -115,8 +119,8 @@ module frontpanel(){
 }
 
 
-//translate([-40,0,0])rotate([0,90,0])frontpanel();
+translate([-40,0,0])rotate([0,90,0])frontpanel();
 //color("red")translate([-35,0,-5])rotate([0,90,0])antenna_cover();
-spoutholder();
+//spoutholder();
 //color("blue")cboard_cover();
 
