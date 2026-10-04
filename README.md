@@ -1,99 +1,214 @@
-﻿# HomeBrew
- Tracking two rats independently during oral operant self-administration of solutions (e.g. sucrose, alcohol, opioids).
+# HomeBrew
 
-## Program Structure
+> Raspberry Pi based hardware and software for independently tracking oral operant self-administration behavior in up to four rats.
 
-   Main Program: main.py (main_test.py) is the entry program. This program handles session command and rat ID
-   scanning, adjusting the pump position, and finally calling the operant.py as a subprocess.
-   Note that this program does not exit after calling the subprocess. It it kept alive, as the
-   main thread, to record rat's ID when they poke their head near the antenna. Rat's ID are
-   stored in _active and _inactive files located in the /home/pi/ directory.
-   
-   Operant Program: operant.py (operant_test.py) is the program which main invoke at the end of it's executation.
-   This program handles saving each data point to corresponding data files.
+HomeBrew coordinates RFID identification, active and inactive spout events, syringe-pump movement, visual indicators, session configuration, and data recording. It is intended for experiments involving orally delivered solutions such as sucrose, alcohol, or opioids.
 
-   Pump Driver Program: pump_move.py is the program that is used, as a higher level abstraction, to drive the stepper motor using underlying gpiozero/RPi.GPIO library. This program mainly consist of the PumpMove class which contains a move() class for "rotating" the motor (forward and backward). The __del__ method need to be call at the end of each use to 'shutoff' the motor. This prevent the motor driver from overheating (there are more efficient ways to do this).
-   
-   Activity Counter Program: Rat's activity (inactive lick, active lick, and etc) are being represent as an instance of RatActivityCounter.
 
-   PumpCalibration Program: Currently, the motor step size is not accurate enough. The pump's step need to be modified from time to time. This program prompt the user to measure the amount of solution the pump push out and enter that amount. Then the program will automatically re-adjust the step size.
-   
+## Highlights
+
+- Tracks as many as four animals independently
+- Uses RFID values to identify commands and animals
+- Records active and inactive behavioral events
+- Controls a stepper-driven syringe pump
+- Supports manual pump positioning with forward and backward controls
+- Includes limit-switch protection and LED/pixel-ring feedback
+- Stores session settings and pump calibration values
+- Provides separate test versions of the main and operant programs
+- Includes scripts for network checks and recovery from empty Python files
+- Includes OpenSCAD files for project-related fabricated parts
+
+## Repository Layout
+
+```text
+HomeBrew/
+├── openscad/          # OpenSCAD models for mechanical/fabricated components
+├── python/            # Experiment control, hardware control, and data collection
+├── utility_script/    # Startup, integrity-check, and maintenance scripts
+├── wifi-network/      # Network-related configuration or support files
+├── .gitignore
+└── README.md
+```
+
+## System Overview
+
+The software is divided into two long-running responsibilities:
+
+1. **Session controller** — `main.py` or `main_test.py`
+2. **Operant controller** — `operant.py` or `operant_test.py`
+
+The session controller reads a configured command RFID, collects the animals' RFID values, allows pump positioning during setup, and starts the operant controller as a subprocess. The session controller remains active afterward so it can continue identifying animals at the active and inactive spouts.
+
+```mermaid
+flowchart TD
+    A[Start main.py] --> B[Select session]
+    B --> C[Scan command RFID]
+    C --> D[pump calibration /optional/]
+    D --> E[Adjust pump position]
+    E --> F[Scan animal RFID tags]
+    F --> G[Disable manual adjustment]
+    G --> H[Start operant.py subprocess]
+    H --> I[Monitor active and inactive RFID events]
+    H --> J[Monitor lick and operant inputs]
+    I --> K[Write animal-specific event records]
+    J --> K
+    J --> L[Deliver configured reward]
+```
+
+## Main Software Components
+
+### `main.py` / `main_test.py`
+
+The main entry point is responsible for:
+
+- reading session commands
+- scanning animal RFID tags
+- managing the pump-positioning period
+- launching the operant program
+- continuing to monitor RFID input while the operant process runs
+- writing active and inactive identification records
+
+The test variant is intended for development or hardware validation. Confirm its behavior against the production script before relying on it during an experiment.
+
+### `operant.py` / `operant_test.py`
+
+The operant program is launched by the main program with the information required for the selected session. It manages operant events and saves recorded data to the corresponding output files.
+
+### `pump_move.py`
+
+This module provides a higher-level `PumpMove` abstraction over Raspberry Pi GPIO control. Its movement method drives the stepper motor forward or backward.
+
+The motor outputs must be disabled after use. Leaving the driver energized can cause unnecessary heating.
+
+### `RatActivityCounter`
+
+Animal activity values, including active and inactive licking or related events, are represented through `RatActivityCounter` instances.
+
+### Pump calibration
+
+The calibration program compensates for changes in the relationship between motor steps and delivered volume. The operator measures the actual amount dispensed, enters that value, and the software recalculates the step setting.
+
+Calibrate whenever the syringe, tubing, mechanical drive, solution, or pump geometry changes, and verify the resulting volume with repeated measurements.
+
+## Experiment Workflow
+
+1. Power the Raspberry Pi and connected hardware.
+2. Confirm network status if the installation depends on network access.
+3. Start the main program.
+4. Scan a command RFID configured in `session_configuration.csv`.
+5. Position the syringe pump before finalizing setup.
+6. Scan the RFID tag for each animal assigned to the session.
+7. Allow the main program to launch the operant process.
+8. Monitor the apparatus and verify that active/inactive events are attributed correctly.
+9. At the end of the session, confirm that all expected output files were written and safely stop the hardware.
+
+The current logic distinguishes active and inactive RFID input by identifier length: eight characters for active input and ten characters for inactive input. Because identifier length is part of the input protocol, RFID readers and tags must be tested with the exact deployed configuration.
 
 ## Configuration
-   - Files
 
-     - /home/pi/peerpub_config.json
-        This file stores 3 information: device ID, session number/ID, and stepper motor step size. (The session number is increament by 1 each time the program start)
+The existing code expects configuration in absolute Raspberry Pi paths.
 
-     - /home/pi/openbehavior/PeerPub/python/session_configuration.csv
-        This file is used by the program to read in the session information. 
+| File | Purpose |
+|---|---|
+| `/home/pi/homebrew_config.json` | Stores the device ID, session number/ID, and stepper-motor step size. The session number is incremented when the program starts. |
+| `/home/pi/openbehavior/HomeBrew/python/session_configuration.csv` | Defines session information and command RFID mappings. |
+| `/home/pi/openbehavior/HomeBrew/python/config.py` | Centralizes directory paths and provides `get_sessioninfo(sessionid)` for reading session data from the CSV file. |
 
-     - /home/pi/openbehavior/PeerPub/python/config.py
-        This file stores different directory paths. Note that these path are all absolute paths. There's a "get_sessioninfo" function which takes in a argument "sessionid" to retrive session information from "session_configuration.csv" mentioned above. A good practice is to put related configuration functions in this file and import then when needed.
 
-## Utility Scripts
 
-   **check_empty_program.sh**: a script that check the size of every python file in the python/ directory. If one or more files are empty the script then reclone the entire repository.
+Clone this repository to the Raspberry Pi:
 
-   **check_network.sh**: a script that check the network connection right after the device boots up and ask user for action when the device was not able to connect to network.
+```bash
+git clone https://github.com/miraclezero/HomeBrew.git
+cd HomeBrew
+```
 
-## Program Overview
-The main (main_test.py) program is used to read/scan the pre-configured command RFID stored in 'session_configuration.csv' file under python directory. After the command ID is scaned, the program proceed to ask for scanning rat's ID. The time between scanning rat's ID and command ID is the time for adjusting the pump position (e.g. after the rat's ID are scanned, the pump adjustment are disabled to avoid driver board overheating). After the rat's ID are scanned, the main program spawns a new operant (operant_test.py) program by passing in the necessary arguments and run it in the background. Note that because the operant program is a thread, the main program is kept alive (e.g. running in parallel with the operant program). The main program is tasked with reading the rat's ID when they poke their head into the active or inactve spout (disctinguished by the length of characters: 10 for inactive poke and 8 for active poke).
+Start the main program
 
-## Parts and GPIO Pin Connections Table
+```bash
+cd python
+python3 main_test.py
+```
 
-   [DRV8834 Low-Voltage Stepper Motor Driver](https://www.pololu.com/product/2134), [Stepper Motor](https://www.pololu.com/product/2267), [Belker Universal AC Adapter 3-12V](https://www.amazon.com/Belker-Adjustable-Universal-Household-Electronics/dp/B07NKZCWT1/ref=asc_df_B07NKZCWT1/?tag=hyprod-20&linkCode=df0&hvadid=366402536789&hvpos=&hvnetw=g&hvrand=9548953669677245441&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9013532&hvtargid=pla-800552094134&psc=1&tag=&ref=&adgrpid=75347436439&hvpone=&hvptwo=&hvadid=366402536789&hvpos=&hvnetw=g&hvrand=9548953669677245441&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9013532&hvtargid=pla-800552094134)
-   | Pins on the driver | GPIO pin slot on the Pi, external power supply, and the stepper motor|
-   |--------------------|------------------------|
-   |      VMOT         |      **AC Adapter** - positive end of LED Terminal Adapter    |
-   |     GND |   **AC Adapter** - negative end of LED Terminal Adapter |
-   | B2, B1, A1, A2 |    **Stepper Motor** - Black, Green, Red, and Blue wire respectively      |
-   |      GND |    **Pi** - Any GND pin                |
-   |      M0, M1 | **Pi** - GPIO 17 and 22       |
-   |     SLP | **Pi** - Any 3v3 pin          |
-   |      STEP | **Pi** - GPIO 6            |
-   |      DIR | **Pi** - GPIO 26 |
-   
-   [Adafruit 12-Key Capacitive Touch Sensor - MPR121](https://www.adafruit.com/product/1982)
-   | Pins on the driver | GPIO pin slot on the Pi and external wires|
-   |--------------------|------------------------|
-   |  SCL, SDA | **Pi** - GPIO 3 and 2 respectively |
-   |  3Vo | **Pi** - Any 3v3 pin|
-   |  GND | **Pi** - Any GND pin|
-   |  0 | **external wire** - inactive wire|
-   |  1 | **external wire** - active wire|
-   
-   
-   [Limit Switch](https://www.amazon.com/MXRS-Hinge-Momentary-Button-Switch/dp/B07MW2RPJY/ref=lp_5739467011_1_7)
-   | Pins on the driver | GPIO pin slot on the Pi and external wires|
-   |--------------------|------------------------|
-   |  Normally Open (NO) | **Pi** - any 5V pin|
-   |  Forward Limit - Contact Point (C) | **Pi** - GPIO 24|
-   |  Backward Limit - Contact Point (C) | **Pi** - GPIO 23|
+## Hardware
 
-   [Push Button](https://www.amazon.com/DAOKI-Miniature-Momentary-Tactile-Quality/dp/B01CGMP9GY/ref=asc_df_B01CGMP9GY/?tag=hyprod-20&linkCode=df0&hvadid=309774137275&hvpos=&hvnetw=g&hvrand=7843520885449353644&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9013532&hvtargid=pla-640514760452&psc=1)
-   | Pins on the driver | GPIO pin slot on the Pi|
-   |--------------------|------------------------|
-   | Forward Button | **Pi** - GPIO 5|
-   | Backward Button | **Pi** - GPIO 27|
-   **Connect resistor and GND correspondingly**
-   
-   [Pixel Ring](https://www.adafruit.com/product/1643)
-   | Pins on the driver | GPIO pin slot on the Pi|
-   |--------------------|------------------------|
-   | IN | **Pi** - GPIO 18|
-   | GND | **Pi** - any GND pin |
-   | 5V DC | **Pi** - any 5V pin |
-   
-   [LED lights]
-   | Pins on the driver | GPIO pin slot on the Pi|
-   |--------------------|------------------------|
-   | Active LED | **Pi** - GPIO 16|
-   | Inactive LED | **Pi** - GPIO 19 |
-   **Connect resistor and GND correspondingly**
+The documented setup uses the following major components:
 
-## Resources
-   [Raspberry Pi Stepper Motor Tutorial](https://www.rototron.info/raspberry-pi-stepper-motor-tutorial/)  
-   [Raspberry Pi Stepper Motor Control with nema17](https://makersportal.com/blog/raspberry-pi-stepper-motor-control-with-nema-17)  
-   [OpenSourceSyringePump](http://cavarnon.com/syringepump)  
-   [How to Control a stepper motor with DRV8825 driver and Arduino](https://www.makerguides.com/drv8825-stepper-motor-driver-arduino-tutorial/)  
+- Raspberry Pi
+- DRV8834 low-voltage stepper-motor driver
+- stepper motor
+- external 3–12V power adapter
+- Adafruit MPR121 12-key capacitive-touch sensor
+- forward and backward limit switches
+- forward and backward push buttons
+- pixel ring
+- active and inactive LEDs
+- RFID readers/antennas used by the experiment
+- syringe-pump mechanism
+
+
+## GPIO and Wiring Reference
+
+All GPIO values below use **BCM numbering**, as implied by the existing documentation. Confirm this convention in the code before wiring.
+
+### Stepper Motor Driver — DRV8834
+
+| Driver pin | Connection |
+|---|---|
+| `VMOT` | Positive terminal of the external power adapter |
+| `GND` | Negative terminal of the external power adapter |
+| `B2`, `B1`, `A1`, `A2` | Stepper motor wires: black, green, red, and blue, respectively |
+| Logic `GND` | Any Raspberry Pi ground pin |
+| `M0`, `M1` | GPIO 17 and GPIO 22 |
+| `SLP` | Any Raspberry Pi 3.3V pin |
+| `STEP` | GPIO 6 |
+| `DIR` | GPIO 26 |
+
+The listed motor wire colors may not apply to every motor. Identify coil pairs from the motor documentation or with a meter before connecting the driver.
+
+### Capacitive-Touch Sensor — MPR121
+
+| MPR121 pin | Connection |
+|---|---|
+| `SCL` | GPIO 3 / I²C clock |
+| `SDA` | GPIO 2 / I²C data |
+| `3Vo` | Any Raspberry Pi 3.3V pin |
+| `GND` | Any Raspberry Pi ground pin |
+| `0` | Inactive-contact wire |
+| `1` | Active-contact wire |
+
+### Limit Switches
+
+| Switch terminal | Connection |
+|---|---|
+| Normally Open (`NO`) | Raspberry Pi 5V connection, red wire |
+| Forward contact (`C`) | GPIO 24, green wire |
+| Backward contact (`C`) | GPIO 23, white wire |
+
+
+
+### Manual Pump Buttons
+
+| Control | Connection |
+|---|---|
+| Forward button | GPIO 5 |
+| Backward button | GPIO 27 |
+| GND connect with resistor | Any Raspberry Pi ground pin  |
+
+### Pixel Ring
+
+| Pixel-ring pin | Connection |
+|---|---|
+| `IN` | GPIO 18 |
+| `GND` | Any Raspberry Pi ground pin |
+| `5V DC` | Any Raspberry Pi 5 V pin |
+
+Check the ring's maximum current demand before powering it from the Raspberry Pi header.
+
+### Status LEDs
+
+| LED | Connection |
+|---|---|
+| Active LED | GPIO 16 |
+| Inactive LED | GPIO 19 |
+| GND connect with resistor | Any Raspberry Pi ground pin |
