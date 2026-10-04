@@ -7,7 +7,7 @@ DEVID_FILE = ROOT+'/deviceid'
 RATID_FILE = ROOT+'/ratids'
 SESSIONID_FILE = ROOT+'/sessionid'
 
-JSON_CONFIG_FILE = ROOT + '/peerpub_config.json'
+JSON_CONFIG_FILE = ROOT + '/homebrew_config.json'
 
 class IDS:
     def __init__(self):
@@ -15,7 +15,7 @@ class IDS:
             with open(JSON_CONFIG_FILE ,'r') as f:
                 json_data = json.load(f)
         except FileNotFoundError:
-            sys.exit("peerpub_config.json file not found in /home/pi")
+            sys.exit("homebrew_config.json file not found in /home/pi")
             
         self.devID = json_data['deviceid']
         self.sesID = json_data['sessionid']
